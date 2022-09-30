@@ -245,7 +245,9 @@ class ClassifyLayer(nn.Module):
             _, tag_result = torch.max(tag_scores, 2)  # give up to block <pad> label for efficiency
         tag_result.add_(1)
         if self.training:
-            return tag_result, self.criterion(tag_scores.view(-1, self.num_tags), Variable(y).view(-1)) # computing loss
+            opqr = self.criterion(tag_scores.view(-1, self.num_tags), Variable(y).view(-1))
+            assert opqr.shape == (x.shape[0]*x.shape[1],)
+            return tag_result,  opqr# computing loss
         else:
             return tag_result, torch.FloatTensor([0.0]) # return predict result
 
@@ -265,12 +267,12 @@ class Model(nn.Module):
         self.embedding_layer = embedding_layer
 
         encoder_output_size = None
-        # define bilstm encoder
+        # define bilstm encoderhidd
         if opt.encoder.lower() == 'lstm':
             self.encoder = nn.LSTM(
                 input_size=opt.word_dim, hidden_size=opt.hidden_dim, num_layers=opt.depth,
                 batch_first=True, dropout=opt.dropout, bidirectional=True
-            ) # encoder :bilstm encoder (word_dim , hidden_dim*2)
+            ) # encoder :bilstm encoder (word_dim , en_dim*2)
             encoder_output_size = 2 * opt.hidden_dim  # because of the bi-directional
         else:
             raise ValueError('Unknown classifier {0}'.format(opt.lstm))

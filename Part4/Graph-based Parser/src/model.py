@@ -72,7 +72,7 @@ class Parser(torch.nn.Module):
 
         # 构造[h, m]矩阵
         length = max(length)
-        # [batch_size, length, 1, 2 * hidden_dim]
+        # [batch_size, length, 1, 2 * hidden_dim] #这里做得很不错！
         feature_a = feature.unsqueeze(2).repeat(1, 1, length, 1)
         # [batch_size, 1, length, 2 * hidden_dim]
         feature_b = feature.unsqueeze(1).repeat(1, length, 1, 1)
@@ -118,7 +118,7 @@ def hinge_loss(score: torch.FloatTensor,
 
         # 统计所有的预测依存树
         all_loss_dependent = []
-        for i in range(len(real_dependent)):
+        for i in range(len(real_dependent)):  #对每个batch
             current_dependent = real_dependent[i]
             all_loss_dependent.append(pool.apply_async(
                 decoder, (score[i].tolist(), length[i], current_dependent, )))
